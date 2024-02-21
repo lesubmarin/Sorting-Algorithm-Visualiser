@@ -4,7 +4,6 @@
 #include <random>
 #include <ranges>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <chrono>
 
 const int WindowWidth = 900;
@@ -35,35 +34,37 @@ int main(int argc, char *argv[])
     SDL_CreateWindowAndRenderer(WindowWidth, WindowHeight, 0, &window, &renderer);
     SDL_RenderSetScale(renderer, 1, 1);
 
-    // Create random vector of 300 elements
+    // Create random vector of 100 elements
     std::random_device rd;
     std::uniform_int_distribution<int> dist(1, 639);
     std::vector<int> vec;
-    for (int i = 0; i < 300; i++)
+    for (int i = 0; i < 100; i++)
     {
         vec.push_back(dist(rd));
     }
    
     // Calculate bar width
-    int width, height;
-    SDL_GetRendererOutputSize(renderer, &width, &height);
-    int barWidth = width / vec.size();
+    int barWidth = WindowWidth / vec.size();
 
     // Insertion sort
     int n = vec.size();
-    int iterations = 0;
+    int comparisons = 0; // Initialize comparison counter
     auto startTime = std::chrono::high_resolution_clock::now();
     for(int i = 0; i < n-1; i++) {
+
         // Finds the minimum element between i+1 and n
         int min_idx = i;
         for(int j = i+1; j < n; j++) {
+            comparisons++; // Increment comparison counter
             if(vec[j] < vec[min_idx]) {
                 min_idx = j;
             }
         }
         // Interchange the minimum element with the first element
-        std::swap(vec[min_idx], vec[i]);
-        
+        int temp = vec[min_idx];
+        vec[min_idx] = vec[i];
+        vec[i] = temp;
+
         // Clear screen
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
@@ -75,13 +76,38 @@ int main(int argc, char *argv[])
         SDL_RenderPresent(renderer);
 
         // Delay
-        SDL_Delay(10); // Adjust delay as needed
+        SDL_Delay(100); // Adjust delay as needed
         
-        // Print iteration count and time to console
-        iterations++;
+        // Print comparisons count and time to console
         auto currentTime = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count();
-        std::cout << "Iteration: " << iterations << ", Total time: " << duration << " ms" << std::endl;
+        std::cout << "Comparisons: " << comparisons << ", Total time: " << duration << " ms" << std::endl;
     }
+
+    // Print number of comparisons
+    std::cout << "Number of comparisons: " << comparisons << std::endl;
+
+    // Main loop flag
+    bool quit = false;
+
+    // Main loop
+    while (!quit)
+    {
+        // Event handling
+        SDL_Event e;
+        while (SDL_PollEvent(&e) != 0)
+        {
+            if (e.type == SDL_QUIT)
+            {
+                quit = true; // Set the quit flag if the user closes the window
+            }
+        }
+    }
+
+    // Clean up resources and quit SDL
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
     return 0;
 }

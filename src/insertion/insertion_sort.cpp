@@ -4,7 +4,6 @@
 #include <random>
 #include <ranges>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <chrono>
 
 const int WindowWidth = 900;
@@ -29,60 +28,80 @@ void draw_state(std::vector<int>& v, SDL_Renderer* renderer, unsigned int red, u
 
 int main(int argc, char *argv[])
 {
-     // Create window
+    // Create window
     SDL_Window *window = nullptr;
     SDL_Renderer *renderer = nullptr;
     SDL_CreateWindowAndRenderer(WindowWidth, WindowHeight, 0, &window, &renderer);
     SDL_RenderSetScale(renderer, 1, 1);
 
-    // Create random vector of 300 elements
+    // Create random vector of 100 elements
     std::random_device rd;
     std::uniform_int_distribution<int> dist(1, 639);
     std::vector<int> vec;
-    for (int i = 0; i < 300; i++)
+    for (int i = 0; i < 100; i++)
     {
         vec.push_back(dist(rd));
     }
    
     // Calculate bar width
-    int width, height;
-    SDL_GetRendererOutputSize(renderer, &width, &height);
-    int barWidth = width / vec.size();
+    int barWidth = WindowWidth / vec.size();
 
     // Insertion sort
     int i, poz;
     int n = vec.size();
-    int iterations = 0;
+    int comparisons = 0; // Counter for comparisons
     auto startTime = std::chrono::high_resolution_clock::now();
     for(i = 1; i < n; i++) {
         int val = vec[i];
         // Search for the position where the element should be inserted
         for(poz = i; poz != 0 && vec[poz - 1] > val; poz--) {
             // Shift elements to the right
-            vec[poz] = vec[poz - 1];
+            vec[poz] = vec[poz-1];
+            comparisons++; // Increment the comparisons counter
 
-             // Clear screen
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
+            // Clear screen
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
 
-        // Draw state
-        draw_state(vec, renderer, i, poz, barWidth);
+            // Draw state
+            draw_state(vec, renderer, i, poz, barWidth);
 
-        // Render
-        SDL_RenderPresent(renderer);
+            // Render
+            SDL_RenderPresent(renderer);
 
-        // Delay
-        SDL_Delay(10);
+            // Delay
+            SDL_Delay(10);
         }
 
         vec[poz] = val;
 
-        // Print iteration count and time to console
-        iterations++;
+        // Print comparisons count and time to console
         auto currentTime = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count();
-        std::cout << "Iteration: " << iterations << ", Total time: " << duration << " ms" << std::endl;
+        std::cout << "Comparisons: " << comparisons << ", Total time: " << duration << " ms" << std::endl;
     }
+    
+    // Main loop flag
+    bool quit = false;
+
+    // Main loop
+    while (!quit)
+    {
+        // Event handling
+        SDL_Event e;
+        while (SDL_PollEvent(&e) != 0)
+        {
+            if (e.type == SDL_QUIT)
+            {
+                quit = true; // Set the quit flag if the user closes the window
+            }
+        }
+    }
+
+    // Clean up resources and quit SDL
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 
     return 0;
 }

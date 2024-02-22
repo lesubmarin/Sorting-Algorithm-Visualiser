@@ -2,11 +2,12 @@
 #include <vector>
 #include <algorithm>
 #include <random>
+#include <numeric>
 #include <ranges>
 #include <SDL2/SDL.h>
 #include <chrono>
 
-const int WindowWidth = 900;
+const int WindowWidth = 1280;
 const int WindowHeight = 640;
 
 void draw_state(std::vector<int>& v, SDL_Renderer* renderer, unsigned int red, unsigned int blue, int barWidth) {
@@ -34,14 +35,14 @@ int main(int argc, char *argv[])
     SDL_CreateWindowAndRenderer(WindowWidth, WindowHeight, 0, &window, &renderer);
     SDL_RenderSetScale(renderer, 1, 1);
 
-    // Create random vector of 100 elements
+    // Create vector with numbers from 1 to 640
+    std::vector<int> vec(640);
+    std::iota(vec.begin(), vec.end(), 1); // Fill vector with numbers from 1 to 100
+
+    // Shuffle the vector randomly
     std::random_device rd;
-    std::uniform_int_distribution<int> dist(1, 639);
-    std::vector<int> vec;
-    for (int i = 0; i < 100; i++)
-    {
-        vec.push_back(dist(rd));
-    }
+    std::mt19937 g(rd());
+    std::shuffle(vec.begin(), vec.end(), g);
    
     // Calculate bar width
     int barWidth = WindowWidth / vec.size();
@@ -70,7 +71,7 @@ int main(int argc, char *argv[])
             SDL_RenderPresent(renderer);
 
             // Delay
-            SDL_Delay(10);
+            SDL_Delay(1);
         }
 
         vec[poz] = val;

@@ -17,9 +17,17 @@ This is a simple program written in C++ using SDL (Simple DirectMedia Layer) for
 - The console will display information about each iteration of the sorting algorithm, including the iteration count and total time elapsed.
 
 ## Supported Sorting Algorithms
+# Real Algorithms
 - Bubble Sort
 - Insertion Sort
 - Selection Sort
+- Merge Sort
+- Quick Sort
+
+# Pseudo Algorithms
+- Bogo Sort
+- Stalin Sort
+
 
 ## Contributing
 Contributions are welcome! If you'd like to contribute to this project, feel free to submit a pull request.
